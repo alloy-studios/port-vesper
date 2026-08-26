@@ -2,7 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Port Vesper">
+<meta name="theme-color" content="#07090d">
 <title>PORT VESPER — City Sandbox</title>
 <style>
   :root{
@@ -14,9 +19,11 @@
     --panel:rgba(8,12,17,.92);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;background:var(--ink);color:#dfe7ef;
-    font-family:"Roboto Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
-  canvas#game{display:block;position:fixed;inset:0;cursor:none;}
+  html,body{height:100vh;height:100dvh;overflow:hidden;background:var(--ink);color:#dfe7ef;
+    font-family:"Roboto Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none;
+    -webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;}
+  canvas#game{display:block;position:fixed;top:0;left:0;cursor:none;}
   .ui{position:fixed;z-index:5;pointer-events:none;user-select:none}
 
   /* ---- HUD ---- */
@@ -89,6 +96,72 @@
     background:transparent;font:inherit;font-size:12px;letter-spacing:.3em;padding:13px 34px}
   #go:hover{background:var(--scan);color:#04070a}
   #bigmap canvas{border:1px solid #26313f;background:#080b10;max-width:92vw;max-height:86vh}
+
+  /* ---- touch controls ---- */
+  #touch{position:fixed;inset:0;z-index:8;display:none;pointer-events:none}
+  #touch.on{display:block}
+  .stick{position:absolute;width:132px;height:132px;margin:-66px 0 0 -66px;border-radius:50%;
+    border:1.5px solid rgba(142,242,196,.28);background:rgba(8,14,20,.30);opacity:0;
+    transition:opacity .12s;pointer-events:none}
+  .stick.live{opacity:1}
+  .stick i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;
+    border-radius:50%;background:rgba(142,242,196,.30);border:1.5px solid rgba(142,242,196,.6)}
+  #stickR{border-color:rgba(255,59,92,.30)}
+  #stickR i{background:rgba(255,59,92,.28);border-color:rgba(255,59,92,.65)}
+  .tb{position:absolute;pointer-events:auto;border:1.5px solid rgba(142,242,196,.4);
+    background:rgba(8,14,20,.55);color:#cfe8dc;font:inherit;font-size:11px;letter-spacing:.1em;
+    border-radius:50%;width:62px;height:62px;display:flex;align-items:center;justify-content:center;
+    text-align:center;line-height:1.1;padding:0}
+  .tb:active,.tb.held{background:rgba(142,242,196,.85);color:#04070a}
+  .tb.wide{border-radius:22px;width:70px;height:40px;font-size:10px}
+  #btnE {right:calc(20px + env(safe-area-inset-right));  bottom:180px}
+  #btnHB{right:calc(96px + env(safe-area-inset-right));  bottom:126px}
+  #btnR {right:calc(20px + env(safe-area-inset-right));  bottom:262px}
+  #btnW {right:calc(96px + env(safe-area-inset-right));  bottom:212px}
+  #btnMap{left:calc(20px + env(safe-area-inset-left));  bottom:196px}
+  #btnSnd{left:calc(20px + env(safe-area-inset-left));  bottom:246px}
+  #btnFS {left:calc(20px + env(safe-area-inset-left));  bottom:296px}
+  #iosHint{display:none;max-width:420px;font-size:10px;line-height:1.7;color:var(--steel);
+    letter-spacing:.08em;border:1px solid #1c2531;padding:10px 14px}
+  #iosHint b{color:var(--scan)}
+
+  /* ---- short landscape phones: keep every control on screen ---- */
+  @media (max-height:440px){
+    .tb{width:50px;height:50px;font-size:9px}
+    .tb.wide{width:58px;height:32px;font-size:9px}
+    #btnE {bottom:104px} #btnHB{bottom:44px;  right:calc(84px + env(safe-area-inset-right))}
+    #btnR {bottom:162px} #btnW {bottom:104px; right:calc(84px + env(safe-area-inset-right))}
+    #btnMap{bottom:44px} #btnSnd{bottom:100px} #btnFS{bottom:156px}
+    .stick{width:110px;height:110px;margin:-55px 0 0 -55px}
+    .stick i{width:46px;height:46px;margin:-23px 0 0 -23px}
+  }
+
+  /* ---- phone layout ---- */
+  @media (max-width:820px), (pointer:coarse){
+    #cash{font-size:21px}
+    #stars{font-size:15px;height:19px;letter-spacing:2px}
+    .bar{width:118px;height:7px}
+    #minwrap{width:118px;right:calc(10px + env(safe-area-inset-right));top:calc(10px + env(safe-area-inset-top))}
+    #mini{width:118px;height:118px}
+    #clock{font-size:9px}
+    #hud{top:calc(10px + env(safe-area-inset-top));left:calc(12px + env(safe-area-inset-left));gap:5px}
+    #wep{font-size:9px}
+    #drift{font-size:24px;bottom:auto;top:150px;right:12px}
+    #drift span{font-size:12px}
+    #prompt{bottom:auto;top:96px;font-size:11px;padding:7px 12px;max-width:74vw;text-align:center}
+    #msg{bottom:auto;top:132px;font-size:12px;max-width:80vw}
+    #jobline{font-size:9px;padding:5px 9px;top:auto;bottom:8px}
+    #robbar{bottom:auto;top:170px}
+    .card{width:94vw}
+    .row{padding:14px}
+  }
+  @media (max-width:820px) and (orientation:portrait) and (pointer:coarse){
+    #rotate{display:flex !important}
+  }
+  #rotate{position:fixed;inset:0;z-index:60;background:#05070a;display:none;
+    align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:30px}
+  #rotate b{font-size:13px;letter-spacing:.3em;color:var(--scan)}
+  #rotate span{font-size:11px;color:var(--steel);letter-spacing:.1em}
 </style>
 </head>
 <body>
@@ -113,6 +186,20 @@
 <div class="ui" id="robbar"><i></i></div>
 <div class="ui" id="drift"></div>
 
+<div id="touch">
+  <div class="stick" id="stickL"><i></i></div>
+  <div class="stick" id="stickR"><i></i></div>
+  <button class="tb" id="btnE">E</button>
+  <button class="tb" id="btnHB">BRAKE</button>
+  <button class="tb" id="btnR">ROB</button>
+  <button class="tb" id="btnW">WEP</button>
+  <button class="tb wide" id="btnMap">MAP</button>
+  <button class="tb wide" id="btnSnd">SOUND</button>
+  <button class="tb wide" id="btnFS">FULL</button>
+</div>
+
+<div id="rotate"><b>ROTATE YOUR DEVICE</b><span>Port Vesper wants landscape</span></div>
+
 <div id="panel"><div class="card"><h2 id="pTitle"></h2><div class="sub" id="pSub"></div><div id="pList"></div><div class="close" id="pClose">[ESC] LEAVE</div></div></div>
 <div id="bigmap"><canvas id="bigc" width="820" height="820"></canvas></div>
 
@@ -132,11 +219,15 @@
     <div><b>SHIFT</b> sprint / boost</div>
     <div><b>SPACE</b> handbrake / drift</div>
     <div><b>G</b> drift assist on/off</div>
+    <div style="grid-column:1/-1;color:#6f8296;padding-top:6px">
+      the police only know what they <i>see</i> — break line of sight and they search
+      your last known position, not you</div>
     <div><b>M</b> city map</div>
     <div><b>P</b> sound on / off</div>
     <div><b>ESC</b> close menus</div>
   </div>
   <button id="go">ENTER THE CITY</button>
+  <div id="iosHint">on iPhone, tap <b>Share</b> → <b>Add to Home Screen</b>, then launch it from there for true fullscreen</div>
 </div>
 
 <script>
@@ -147,8 +238,22 @@
 
 const CV = document.getElementById('game'), ctx = CV.getContext('2d');
 let W = 0, H = 0;
-function resize(){ W = CV.width = innerWidth; H = CV.height = innerHeight; }
-addEventListener('resize', resize); resize();
+function resize(){
+  // visualViewport excludes the address bar / keyboard; innerHeight does not, so on
+  // mobile innerHeight draws part of the game underneath the browser chrome.
+  const vv = globalThis.visualViewport;
+  W = Math.max(1, Math.round(vv ? vv.width  : innerWidth));
+  H = Math.max(1, Math.round(vv ? vv.height : innerHeight));
+  CV.width = W; CV.height = H;
+  CV.style.width = W+'px'; CV.style.height = H+'px';
+}
+addEventListener('resize', resize);
+addEventListener('orientationchange', ()=> setTimeout(resize, 150));
+addEventListener('fullscreenchange', ()=> setTimeout(resize, 60));
+addEventListener('webkitfullscreenchange', ()=> setTimeout(resize, 60));
+if(globalThis.visualViewport) visualViewport.addEventListener('scroll', resize);
+if(globalThis.visualViewport) visualViewport.addEventListener('resize', resize);
+resize();
 
 /* ---------- helpers ---------- */
 const TAU = Math.PI * 2;
@@ -376,15 +481,39 @@ const player = {
 };
 const vehicles = [], peds = [], bullets = [], fx = [], pickups = [];
 let cam = {x:0,y:0}, time = 6.2*60, gameT = 0, started = false, paused = false;
+/* Scales crowd density and the expensive lighting passes. Starts lower on phones
+   and adapts to the frame time it actually measures. */
+let quality = 1, ftAvg = 16, qTimer = 0;
 const keys = {}; let mouse = {x:0,y:0,down:false};
+/* Touch input is normalised into the same shape the keyboard produces, so the
+   rest of the game never has to know which one is driving. */
+const IS_TOUCH = (typeof matchMedia === 'function' && matchMedia('(pointer:coarse)').matches)
+                 || ('ontouchstart' in globalThis);
+const touch = {
+  on:false,
+  mv:{dx:0, dy:0, mag:0},    // left stick: walk direction / steer + throttle
+  aim:{dx:1, dy:0, mag:0},   // right stick: aim + autofire
+  hb:false
+};
 let job = null;  // {type, stage, x,y, pay, label}
 let panelOpen = null, mapOpen = false;
 
-/* spawn player outside a safehouse garage */
+/* nearest point that isn't inside a wall — spawning embedded in a building
+   also blinds every line-of-sight check made against you */
+function clearSpot(x, y){
+  for(let r=0; r<=260; r+=14){
+    for(let a=0; a<TAU; a+=Math.PI/8){
+      const nx = x + Math.cos(a)*r, ny = y + Math.sin(a)*r;
+      if(nx<50||ny<50||nx>WORLD-50||ny>WORLD-50) continue;
+      if(!insideAnyBuilding(nx, ny, 16)) return {x:nx, y:ny};
+    }
+  }
+  return {x, y};
+}
 (function spawnStart(){
   const g = shops.find(s=>s.type==='garage') || shops[0];
-  player.x = g.x; player.y = g.y + 40;
-  if(insideAnyBuilding(player.x,player.y,10)){ player.x = g.x+60; player.y = g.y+60; }
+  const spot = clearSpot(g.x, g.y + 40);
+  player.x = spot.x; player.y = spot.y;
   cam.x = player.x; cam.y = player.y;
 })();
 
@@ -405,17 +534,127 @@ addEventListener('keydown', e=>{
   if(k==='h' && player.car) fx.push({t:0,life:.3,type:'horn',x:player.car.x,y:player.car.y});
 });
 addEventListener('keyup', e=>{ keys[e.key.toLowerCase()] = false; });
-CV.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
-CV.addEventListener('mousedown', e=>{ if(e.button===0) mouse.down=true; });
-addEventListener('mouseup', ()=> mouse.down=false);
+CV.addEventListener('mousemove', e=>{ if(touch.on) return; mouse.x=e.clientX; mouse.y=e.clientY; });
+CV.addEventListener('mousedown', e=>{ if(touch.on) return; if(e.button===0) mouse.down=true; });
+addEventListener('mouseup', ()=>{ if(!touch.on) mouse.down=false; });
 CV.addEventListener('contextmenu', e=>e.preventDefault());
+
+/* ============================================================
+   FULLSCREEN — real fullscreen where supported, dvh sizing everywhere
+   ============================================================ */
+function fsSupported(){
+  const el = document.documentElement;
+  return !!(el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen);
+}
+function fsActive(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function goFullscreen(){
+  const el = document.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+  if(req){ try{ const r = req.call(el); if(r && r.catch) r.catch(()=>{}); }catch(e){} }
+  // landscape lock only works inside fullscreen, and only on some browsers
+  try{
+    if(screen.orientation && screen.orientation.lock){
+      const r2 = screen.orientation.lock('landscape'); if(r2 && r2.catch) r2.catch(()=>{});
+    }
+  }catch(e){}
+  setTimeout(resize, 120);
+}
+function exitFullscreen(){
+  const fn = document.exitFullscreen || document.webkitExitFullscreen;
+  if(fn){ try{ const r = fn.call(document); if(r && r.catch) r.catch(()=>{}); }catch(e){} }
+  setTimeout(resize, 120);
+}
+function toggleFullscreen(){ fsActive() ? exitFullscreen() : goFullscreen(); }
+
+/* ============================================================
+   TOUCH CONTROLS — floating twin sticks, multi-touch safe
+   ============================================================ */
+(function initTouch(){
+  if(!IS_TOUCH) return;
+  touch.on = true;
+  document.getElementById('touch').classList.add('on');
+  const elL = document.getElementById('stickL'), elR = document.getElementById('stickR');
+  const RADIUS = 62;
+  const live = {};                        // pointerId -> {side, ox, oy}
+  function place(el, x, y){ el.style.left = x+'px'; el.style.top = y+'px'; }
+  function knob(el, dx, dy){ el.firstElementChild.style.transform = `translate(${dx*RADIUS}px,${dy*RADIUS}px)`; }
+  function set(side, dx, dy, mag){
+    const t = side==='L' ? touch.mv : touch.aim;
+    t.dx = dx; t.dy = dy; t.mag = mag;
+  }
+  function reset(side){
+    const el = side==='L'?elL:elR;
+    el.classList.remove('live'); knob(el,0,0);
+    if(side==='L') set('L',0,0,0); else touch.aim.mag = 0;
+  }
+  addEventListener('pointerdown', e=>{
+    if(e.target.closest('.tb') || e.target.closest('.card') || e.target.closest('#start')) return;
+    if(panelOpen || mapOpen || !started) return;
+    const side = e.clientX < innerWidth*0.5 ? 'L' : 'R';
+    for(const id in live) if(live[id].side === side) return;   // that stick is taken
+    live[e.pointerId] = {side, ox:e.clientX, oy:e.clientY};
+    const el = side==='L'?elL:elR;
+    place(el, e.clientX, e.clientY); el.classList.add('live'); knob(el,0,0);
+    e.preventDefault();
+  }, {passive:false});
+  addEventListener('pointermove', e=>{
+    const L = live[e.pointerId]; if(!L) return;
+    let dx = e.clientX-L.ox, dy = e.clientY-L.oy;
+    const d = Math.hypot(dx,dy), mag = Math.min(1, d/RADIUS);
+    if(d > 0){ dx/=d; dy/=d; } else { dx=0; dy=0; }
+    // let the stick base drift if the thumb travels past the rim
+    if(d > RADIUS*1.6){ L.ox = e.clientX-dx*RADIUS*1.6; L.oy = e.clientY-dy*RADIUS*1.6;
+                        place(L.side==='L'?elL:elR, L.ox, L.oy); }
+    set(L.side, dx*mag, dy*mag, mag);
+    knob(L.side==='L'?elL:elR, dx*mag, dy*mag);
+    e.preventDefault();
+  }, {passive:false});
+  function end(e){
+    const L = live[e.pointerId]; if(!L) return;
+    reset(L.side); delete live[e.pointerId];
+  }
+  addEventListener('pointerup', end);
+  addEventListener('pointercancel', end);
+
+  // action buttons
+  function hold(id, down, up){
+    const b = document.getElementById(id);
+    b.addEventListener('pointerdown', e=>{ e.preventDefault(); e.stopPropagation(); b.classList.add('held'); down&&down(); }, {passive:false});
+    const off = e=>{ b.classList.remove('held'); up&&up(); };
+    b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
+  }
+  hold('btnE',  ()=>{ if(!panelOpen && !mapOpen) interact(); });
+  hold('btnHB', ()=>{ touch.hb = true; }, ()=>{ touch.hb = false; });
+  hold('btnR',  ()=>{ keys['r'] = true; }, ()=>{ keys['r'] = false; });
+  hold('btnW',  ()=>{
+    const i = player.owned.indexOf(player.wep);
+    player.wep = player.owned[(i+1) % player.owned.length];
+  });
+  hold('btnMap',()=>{ if(panelOpen) return; mapOpen = !mapOpen;
+    document.getElementById('bigmap').style.display = mapOpen?'flex':'none'; if(mapOpen) drawBigMap(); });
+  hold('btnSnd',()=>{ muted = !muted; toast(muted?'SOUND OFF':'SOUND ON'); });
+  hold('btnFS', ()=>{ toggleFullscreen(); });
+  // iOS can't do element fullscreen at all — tell the player how to actually get it
+  if(!fsSupported()){
+    const b = document.getElementById('btnFS');
+    if(b) b.style.display = 'none';
+    const h = document.getElementById('iosHint');
+    if(h) h.style.display = 'block';
+  }
+  addEventListener('fullscreenchange', ()=>{
+    const b = document.getElementById('btnFS');
+    if(b) b.textContent = fsActive() ? 'EXIT' : 'FULL';
+  });
+})();
 
 document.getElementById('go').onclick = ()=>{
   document.getElementById('start').style.display='none';
+  if(IS_TOUCH) goFullscreen();
   initAudio();
   started = true; toast('Rent is due Friday. Figure it out.');
 };
 document.getElementById('pClose').onclick = closePanel;
+if(IS_TOUCH) quality = 0.6;
 
 /* ============================================================
    SOUND — tiny procedural layer, no assets
@@ -548,7 +787,8 @@ function streamWorld(){
   // traffic
   let traffic = 0, cops = 0;
   for(const v of vehicles){ if(v.ai==='traffic') traffic++; if(v.type==='police') cops++; }
-  while(traffic < 26){
+  const TRAFFIC_MAX = Math.round(26*quality), PED_MAX = Math.round(46*quality);
+  while(traffic < TRAFFIC_MAX){
     const n = nearestNode(px,py);
     const i = clamp(n.i + ri(-7,7),0,GRID), j = clamp(n.j + ri(-7,7),0,GRID);
     const p = node(i,j);
@@ -561,7 +801,7 @@ function streamWorld(){
     traffic++;
   }
   // pedestrians
-  while(peds.length < 46){
+  while(peds.length < PED_MAX){
     let ok=false;
     for(let t=0;t<24 && !ok;t++){
       const a = rr(0,TAU), r = rr(420,1300);
@@ -584,15 +824,19 @@ function streamWorld(){
     if(dist(v.x,v.y,px,py) > 3000){ if(v.slot){v.slot.used=false;v.slot.v=null;} vehicles.splice(i,1); }
   }
   // police response
-  const stars = Math.ceil(player.wanted);
-  const wantCops = stars<=0?0:Math.min(1+stars, 7);
-  if(cops < wantCops && gameT%1 < 0.02){
-    const a = rr(0,TAU), r = rr(850,1400);
-    let x = clamp(px+Math.cos(a)*r,ROAD,WORLD-ROAD), y = clamp(py+Math.sin(a)*r,ROAD,WORLD-ROAD);
+  const st = stars();
+  const wantCops = st<=0 ? 0 : [0,1,2,3,5,6][Math.min(st,5)];
+  // hide long enough and dispatch stops sending fresh units
+  if(cops < wantCops && police.searchT < 9 && gameT%1 < 0.02){
+    // units are dispatched toward the last SIGHTING, not toward you — otherwise
+    // they spawn on top of a hidden player and instantly re-acquire visual
+    const ax = police.seen ? px : police.lastKnown.x, ay = police.seen ? py : police.lastKnown.y;
+    const a = rr(0,TAU), r = rr(1300,2000);
+    let x = clamp(ax+Math.cos(a)*r,ROAD,WORLD-ROAD), y = clamp(ay+Math.sin(a)*r,ROAD,WORLD-ROAD);
     const p = roadPointNear(x,y);
     const v = makeVehicle('police', p.x, p.y, rr(0,TAU));
     const nn = nearestNode(v.x, v.y);
-    v.ai='cop'; v.spd=200; v.crew = stars>=3?2:1; v.ni=nn.i; v.nj=nn.j; v.dir=ri(0,3);
+    v.ai='cop'; v.spd=200; v.crew = st>=3?2:1; v.ni=nn.i; v.nj=nn.j; v.dir=ri(0,3);
     vehicles.push(v);
   }
 }
@@ -624,13 +868,62 @@ function nextNode(v){
 /* ============================================================
    CRIME / WANTED
    ============================================================ */
-function crime(amount, why){
-  const before = Math.ceil(player.wanted);
+/* Stars are floor(), not ceil() — a scuffle worth 0.15 must not summon a helicopter.
+   Petty stuff accumulates; it takes a full 1.0 of heat to earn the first star.     */
+function stars(){ return Math.floor(player.wanted + 1e-9); }
+
+const police = {seen:false, losT:0, lastKnown:{x:0,y:0}, searchT:0, hadVisual:false};
+
+function sight(base){ return base * (1 - 0.40*nightAmount()); }   // harder to spot you at night
+
+/* Who actually observed this? Cops trump civilians; `heard` ignores walls (gunfire). */
+function witnessTo(x, y, heard){
+  for(const v of vehicles){
+    if(v.ai!=='cop' || v.dead) continue;
+    const d = dist(v.x,v.y,x,y);
+    if((d < sight(620) && !lineBlocked(v.x,v.y,x,y)) || (heard && d < heard)) return {kind:'cop'};
+  }
+  for(const p of peds){
+    if(p.kind!=='cop' || p.dead) continue;
+    const d = dist(p.x,p.y,x,y);
+    if((d < sight(480) && !lineBlocked(p.x,p.y,x,y)) || (heard && d < heard)) return {kind:'cop'};
+  }
+  let best=null, bd=1e9;
+  for(const p of peds){
+    if(p.dead || p.kind==='cop') continue;
+    const d = dist(p.x,p.y,x,y);
+    if(d >= bd) continue;
+    if((d < sight(330) && !lineBlocked(p.x,p.y,x,y)) || (heard && d < heard)){ best=p; bd=d; }
+  }
+  return best ? {kind:'civ', ped:best} : null;
+}
+
+/* Actually register heat, and tell dispatch WHERE it happened (not where you are now) */
+function applyCrime(amount, why, x, y){
+  const before = stars();
   player.wanted = clamp(player.wanted + amount, 0, 5);
   player.crimes++;
   player.seenT = 0;
-  const after = Math.ceil(player.wanted);
-  if(after>before) toast((why||'CRIME REPORTED') + '  —  ' + after + ' STAR' + (after>1?'S':''));
+  if(x !== undefined){ police.lastKnown.x = x; police.lastKnown.y = y; police.searchT = 0; }
+  const after = stars();
+  if(after > before) toast((why||'CRIME REPORTED') + '  —  ' + after + ' STAR' + (after>1?'S':''));
+  else if(after > 0) toast('REPORTED: ' + (why||'CRIME'));
+}
+
+/* opts: {always} radio/alarm, {heard} noise radius, {x,y} scene of the crime */
+function crime(amount, why, opts){
+  opts = opts || {};
+  const x = opts.x !== undefined ? opts.x : (player.car?player.car.x:player.x);
+  const y = opts.y !== undefined ? opts.y : (player.car?player.car.y:player.y);
+  if(opts.always){ applyCrime(amount, why, x, y); return; }
+  const w = witnessTo(x, y, opts.heard||0);
+  if(!w) return;                                    // nobody saw it, nobody knows
+  if(w.kind === 'cop'){ applyCrime(amount, why, x, y); return; }
+  // a civilian has to physically call it in — and they can be outrun
+  const p = w.ped;
+  if(p.reporting){ p.reporting.amount += amount*0.5; }
+  else p.reporting = {t: rr(1.8, 3.4), amount, why, x, y};
+  p.panic = Math.max(p.panic, 4);
 }
 function clearWanted(){ player.wanted = 0; }
 
@@ -654,7 +947,7 @@ function fireWeapon(){
     }
     fx.push({type:'punch',x:ox+Math.cos(player.aim)*30,y:oy+Math.sin(player.aim)*30,t:0,life:.15});
     sfx.punch();
-    if(hit) crime(0.15,'ASSAULT');
+    if(hit) crime(0.15,'ASSAULT');   // 0.15 heat — needs repeating to reach a star
     return;
   }
   if(player.ammo[w.ammo] <= 0){ player.fireT=.3; toast('OUT OF AMMO'); return; }
@@ -670,7 +963,7 @@ function fireWeapon(){
   sfx.shot(w.id);
   // noise attracts attention
   for(const p of peds) if(dist(p.x,p.y,ox,oy)<420 && p.kind!=='cop') p.panic = Math.max(p.panic, 5);
-  if(Math.ceil(player.wanted)<1) crime(0.6,'SHOTS FIRED');
+  if(stars()<1) crime(0.6,'SHOTS FIRED', {heard:520});   // gunfire carries through walls
 }
 
 function copFire(p, tx, ty){
@@ -688,8 +981,8 @@ function damagePed(p, d, by){
   if(p.hp<=0){
     p.dead = true; p.deadT = 0;
     fx.push({type:'blood',x:p.x,y:p.y,t:0,life:2.4,vx:0,vy:0,big:true});
-    if(p.kind==='cop'){ if(by==='p') crime(1.4,'OFFICER DOWN'); pickups.push({x:p.x,y:p.y,kind:'ammo',amt:24,w:'pistol'}); }
-    else { if(by==='p') crime(1.0,'HOMICIDE'); if(rnd()<0.6) pickups.push({x:p.x,y:p.y,kind:'cash',amt:ri(15,160)}); }
+    if(p.kind==='cop'){ if(by==='p') crime(1.4,'OFFICER DOWN',{always:true, x:p.x, y:p.y}); pickups.push({x:p.x,y:p.y,kind:'ammo',amt:24,w:'pistol'}); }
+    else { if(by==='p') crime(1.0,'HOMICIDE',{x:p.x, y:p.y, heard:260}); if(rnd()<0.6) pickups.push({x:p.x,y:p.y,kind:'cash',amt:ri(15,160)}); }
     for(const q of peds) if(dist(q.x,q.y,p.x,p.y)<330 && q.kind!=='cop') q.panic = 7;
   }
 }
@@ -737,7 +1030,8 @@ function respawn(){
   else { player.owned = [wIndex('fist')]; player.wep = wIndex('fist');
          player.ammo = {pistol:0,smg:0,shotgun:0,rifle:0}; }
   player.bustedFlag = false;
-  player.x = s.x + rr(-30,30); player.y = s.y + 46;
+  const spot = clearSpot(s.x + rr(-30,30), s.y + 46);
+  player.x = spot.x; player.y = spot.y;
   player.hp = 100; player.armor = 0; player.vx=player.vy=0;
   clearWanted(); player.dead = 0; player.car = null;
   cam.x=player.x; cam.y=player.y;
@@ -779,9 +1073,9 @@ function enterCar(v){
     const d = v.driver;
     d.x = v.x + Math.cos(v.a+Math.PI/2)*32; d.y = v.y + Math.sin(v.a+Math.PI/2)*32;
     d.panic = 9; d.tgt=null; v.driver = null;
-    crime(1.0,'CARJACKING');
+    crime(1.0,'CARJACKING', {x:v.x, y:v.y});
   } else if(stolen){
-    crime(v.type==='police'?1.2:0.55, v.type==='police'?'STOLEN VPD UNIT':'GRAND THEFT AUTO');
+    crime(v.type==='police'?1.2:0.55, v.type==='police'?'STOLEN VPD UNIT':'GRAND THEFT AUTO', {x:v.x, y:v.y});
   }
   v.ai = null; v.tgt = null;
   v.omega = 0; v.steer = 0; v.aPrev = v.a; v.sliding = false;
@@ -853,7 +1147,7 @@ function carShop(s){
       const val = Math.floor((v.def.price||6000)*0.5*(v.hp/v.maxhp));
       player.money += val; const i=vehicles.indexOf(v); if(i>=0)vehicles.splice(i,1);
       if(v.slot){v.slot.used=false;v.slot.v=null;}
-      if(!v.owned) crime(0.4,'FENCING STOLEN GOODS');
+      if(!v.owned) crime(0.4,'FENCING STOLEN GOODS',{always:true});
       toast('SOLD FOR ' + money(val)); closePanel(); }});
   openPanel(s.name, 'Financing unavailable. Ever.   ' + money(player.money), rows);
 }
@@ -889,10 +1183,10 @@ function hospital(s){
   ]);
 }
 function policeStation(s){
-  const stars = Math.ceil(player.wanted);
-  const bribe = stars*900;
-  openPanel(s.name, stars? 'You walked into a precinct with '+stars+' stars. Bold.' : 'Front desk. Fluorescent lights. Bad coffee.', [
-    {n:'PAY OUTSTANDING FINES', d: stars? 'clears your wanted level' : 'you have no fines', p: stars? money(bribe):'—', dis:!stars,
+  const st = stars();
+  const bribe = st*900;
+  openPanel(s.name, st? 'You walked into a precinct with '+st+' stars. Bold.' : 'Front desk. Fluorescent lights. Bad coffee.', [
+    {n:'PAY OUTSTANDING FINES', d: st? 'clears your wanted level' : 'you have no fines', p: st? money(bribe):'—', dis:!st,
      fn:()=>{ if(buy(bribe)){ clearWanted(); toast('FINES PAID. WE NEVER SPOKE.'); closePanel(); } }},
     {n:'APPLY: PATROL RIDE-ALONG', d:'drive to 3 incidents · legit pay', p:money(900),
      fn:()=>{ closePanel(); startJob(makeDelivery('patrol', 900, 'RESPOND TO INCIDENT')); }},
@@ -970,7 +1264,7 @@ function finishRob(s){
     toast('TOOK ' + money(take));
   }
   s.robbed = gameT + 180;
-  crime(spec.stars, 'ARMED ROBBERY');
+  crime(spec.stars, 'ARMED ROBBERY', {always:true, x:s.x, y:s.y});   // silent alarm
   for(const p of peds) if(dist(p.x,p.y,s.x,s.y)<520 && p.kind!=='cop') p.panic = 9;
   player.robTarget = null; player.robT = 0;
 }
@@ -1019,17 +1313,23 @@ function update(dt){
 
   // aim
   const px = player.car? player.car.x : player.x, py = player.car? player.car.y : player.y;
-  const mw = screenToWorld(mouse.x, mouse.y);
-  player.aim = Math.atan2(mw.y - py, mw.x - px);
+  if(touch.on && touch.aim.mag > 0.15){
+    player.aim = Math.atan2(touch.aim.dy, touch.aim.dx);
+  } else if(!touch.on){
+    const mw = screenToWorld(mouse.x, mouse.y);
+    player.aim = Math.atan2(mw.y - py, mw.x - px);
+  }
 
   if(!paused){
     if(player.car) driveCar(dt); else walk(dt);
     player.fireT -= dt;
-    if(mouse.down && !player.dead){
+    const firing = mouse.down || (touch.on && touch.aim.mag > 0.55);
+    if(firing && !player.dead){
       const w = WEAPONS[player.wep];
-      if(w.auto || w.melee || !player.lastDown) fireWeapon();
+      // on a stick, semi-autos fire at their cyclic rate — you can't tap 5x/sec
+      if(w.auto || w.melee || touch.on || !player.lastDown) fireWeapon();
     }
-    player.lastDown = mouse.down;
+    player.lastDown = firing;
     // robbery hold
     if(player.robTarget){
       const s = player.robTarget;
@@ -1073,6 +1373,8 @@ function camFollow(dt){
     lx = (c*v.spd - sn*(v.lat||0))*0.28;
     ly = (sn*v.spd + c*(v.lat||0))*0.28;
   }
+  else if(touch.on){ lx = Math.cos(player.aim)*110*Math.min(1,touch.aim.mag+0.35);
+                     ly = Math.sin(player.aim)*110*Math.min(1,touch.aim.mag+0.35); }
   else { lx = (mouse.x - W/2)*0.18; ly = (mouse.y - H/2)*0.18; }
   cam.x = lerp(cam.x, tx + lx, 1-Math.pow(0.0012, dt));
   cam.y = lerp(cam.y, ty + ly, 1-Math.pow(0.0012, dt));
@@ -1082,8 +1384,11 @@ function camFollow(dt){
 function walk(dt){
   let ix = (keys['d']||keys['arrowright']?1:0) - (keys['a']||keys['arrowleft']?1:0);
   let iy = (keys['s']||keys['arrowdown']?1:0) - (keys['w']||keys['arrowup']?1:0);
-  const m = Math.hypot(ix,iy) || 1; ix/=m; iy/=m;
-  const sprint = keys['shift'] ? 1.75 : 1;
+  if(touch.on && touch.mv.mag > 0.12){ ix = touch.mv.dx; iy = touch.mv.dy; }
+  let m = Math.hypot(ix,iy);
+  if(m > 1){ ix/=m; iy/=m; m = 1; }
+  // keyboard is always full tilt; on a stick you sprint by pushing to the rim
+  const sprint = (keys['shift'] || (touch.on && m > 0.92)) ? 1.75 : 1;
   const spd = 165*sprint;
   player.vx = lerp(player.vx, ix*spd, 1-Math.pow(0.0001,dt));
   player.vy = lerp(player.vy, iy*spd, 1-Math.pow(0.0001,dt));
@@ -1121,14 +1426,19 @@ function resolveBox(o,b,r){
 /* ---- driving ---- */
 function driveCar(dt){
   const v = player.car, d = v.def;
-  const th = (keys['w']||keys['arrowup']?1:0) - (keys['s']||keys['arrowdown']?1:0);
-  const st = (keys['d']||keys['arrowright']?1:0) - (keys['a']||keys['arrowleft']?1:0);
-  const hb = !!keys[' '];
+  let th = (keys['w']||keys['arrowup']?1:0) - (keys['s']||keys['arrowdown']?1:0);
+  let st = (keys['d']||keys['arrowright']?1:0) - (keys['a']||keys['arrowleft']?1:0);
+  if(touch.on && touch.mv.mag > 0.12){
+    st = clamp(touch.mv.dx*1.5, -1, 1);          // left/right steers
+    th = clamp(-touch.mv.dy*1.5, -1, 1);         // up throttles, down brakes
+    if(Math.abs(th) < 0.22) th = 0;
+  }
+  const hb = !!keys[' '] || touch.hb;
   const top = d.top*(keys['shift']?1.18:1)*(v.hp<v.maxhp*0.35?0.78:1);
 
   /* --- longitudinal: throttle, brakes, reverse, engine braking --- */
-  if(th>0)        v.spd += d.acc*dt*(1 - clamp(v.spd/top,0,1));
-  else if(th<0)   v.spd -= d.acc*(v.spd > 30 ? DRIFT.brakeForce : 0.6)*dt;
+  if(th>0)        v.spd += d.acc*dt*Math.min(1,Math.abs(th)*1.6)*(1 - clamp(v.spd/top,0,1));
+  else if(th<0)   v.spd -= d.acc*(v.spd > 30 ? DRIFT.brakeForce : 0.6)*Math.min(1,Math.abs(th)*1.6)*dt;
   else            v.spd -= v.spd*DRIFT.engineBrake*dt;
   if(hb)          v.spd -= v.spd*(Math.abs(st) > 0 ? 0.9 : 2.4)*dt;  // light scrub mid-slide, hard stop when straight
   v.spd = clamp(v.spd, -top*DRIFT.reverseTop, top);
@@ -1180,7 +1490,8 @@ function tyreFx(v, hb){
       if(prev) skids.push({x1:prev.x, y1:prev.y, x2:rx, y2:ry, t:0});
       v[k] = {x:rx, y:ry};
     }
-    if(skids.length > 1400) skids.splice(0, skids.length-1400);
+    const cap = Math.max(300, Math.round(1400*quality));
+    if(skids.length > cap) skids.splice(0, skids.length-cap);
     if(lat > DRIFT.smokeAt && Math.random() < 0.55)
       fx.push({type:'smoke', x:v.x-Math.cos(v.a)*v.l*0.3+rr(-10,10), y:v.y-Math.sin(v.a)*v.l*0.3+rr(-10,10), t:0, life:.75});
   } else { v['sk-1'] = null; v['sk1'] = null; }
@@ -1278,7 +1589,7 @@ function physVehicle(v, dt){
       if(dist(p.x,p.y,v.x,v.y) < v.l*0.4){
         damagePed(p, vspeed(v)*0.22, v===player.car?'p':'x');
         p.x += Math.cos(v.a)*24; p.y += Math.sin(v.a)*24;
-        if(v===player.car && p.kind!=='cop' && !p.dead) crime(0.2,'RECKLESS DRIVING');
+        if(v===player.car && p.kind!=='cop' && !p.dead) crime(0.2,'RECKLESS DRIVING',{x:p.x,y:p.y});
         v.spd *= 0.94;
       }
     }
@@ -1354,12 +1665,20 @@ function copNextNode(v, tx, ty){
   v.tgt = {x:n.x, y:n.y};
 }
 function aiCop(v, dt){
-  const tx = player.car? player.car.x : player.x;
-  const ty = player.car? player.car.y : player.y;
-  const d = dist(v.x,v.y,tx,ty);
-  const stars = Math.ceil(player.wanted);
+  const st = stars();
   v.omega = 0; v.steer = 0;
-  if(stars===0){ aiTraffic(v,dt); return; }
+  if(st===0){ aiTraffic(v,dt); return; }
+  // With no eyes on the suspect they drive to the last sighting and sweep outward
+  // from there — they do not magically track you through buildings.
+  if(!police.seen){
+    if(!v.searchPt || dist(v.x,v.y,v.searchPt.x,v.searchPt.y) < 150){
+      const n = nearestNode(police.lastKnown.x + rr(-P*1.5,P*1.5), police.lastKnown.y + rr(-P*1.5,P*1.5));
+      const q = node(n.i,n.j); v.searchPt = {x:q.x, y:q.y};
+    }
+  } else v.searchPt = null;
+  const tx = police.seen ? (player.car? player.car.x : player.x) : v.searchPt.x;
+  const ty = police.seen ? (player.car? player.car.y : player.y) : v.searchPt.y;
+  const d = dist(v.x,v.y,tx,ty);
   if(unstick(v, dt)) return;
   // direct chase only when the street is clear; otherwise follow the road grid
   const clearShot = d < 520 && !lineBlocked(v.x, v.y, tx, ty);
@@ -1371,7 +1690,7 @@ function aiCop(v, dt){
   const want = Math.atan2(aimY-v.y, aimX-v.x);
   const df = angDiff(v.a, want);
   v.a += clamp(df, -2.7*dt, 2.7*dt);
-  let target = 250 + stars*45;
+  let target = police.seen ? 250 + st*45 : 200;
   if(clearShot && d < 90) target = player.car? 260 : 0;
   if(Math.abs(df) > 1.5) target = Math.min(target, 100);
   v.spd = lerp(v.spd, target, 1-Math.pow(0.05,dt));
@@ -1394,18 +1713,27 @@ function updatePeds(dt){
     p.t += dt;
     if(p.kind==='cop'){
       const d = dist(p.x,p.y,px,py);
-      const stars = Math.ceil(player.wanted);
-      if(stars>0){
+      const st = stars();
+      if(st>0 && !police.seen){
+        const lk = police.lastKnown, dl = dist(p.x,p.y,lk.x,lk.y);
+        if(dl > 70){
+          const a = Math.atan2(lk.y-p.y, lk.x-p.x); p.a = a;
+          p.x += Math.cos(a)*p.spd*dt; p.y += Math.sin(a)*p.spd*dt;
+          for(const b of near(p.x,p.y,50)) resolveBox(p,b,12);
+        } else wander(p, dt);
+        continue;
+      }
+      if(st>0){
         const a = Math.atan2(py-p.y, px-p.x);
-        if(d > (stars>=2? 200 : 46)){
+        if(d > (st>=2? 200 : 46)){
           p.x += Math.cos(a)*(p.spd*1.25)*dt; p.y += Math.sin(a)*(p.spd*1.25)*dt;
           for(const b of near(p.x,p.y,50)) resolveBox(p,b,12);
         }
         p.a = a;
         p.fireT -= dt;
-        if(stars>=2 && d < 340 && p.fireT<=0 && !player.dead){ copFire(p, px+rr(-14,14), py+rr(-14,14)); p.fireT = rr(.35,.9); }
+        if(st>=2 && d < 340 && p.fireT<=0 && !player.dead && !lineBlocked(p.x,p.y,px,py)){ copFire(p, px+rr(-14,14), py+rr(-14,14)); p.fireT = rr(.35,.9); }
         // arrest attempt
-        if(stars>0 && !player.car && d < 42 && !player.dead){
+        if(st>0 && !player.car && d < 42 && !player.dead){
           player.arrestT += dt;
           if(player.arrestT > 1.4) busted();
         }
@@ -1413,6 +1741,14 @@ function updatePeds(dt){
         wander(p, dt);
       }
       continue;
+    }
+    // witness on the phone to dispatch — outrun them and the call never lands
+    if(p.reporting){
+      p.reporting.t -= dt;
+      if(p.reporting.t <= 0){
+        applyCrime(p.reporting.amount, p.reporting.why, p.reporting.x, p.reporting.y);
+        p.reporting = null;
+      }
     }
     // civilians
     if(p.panic > 0){
@@ -1500,17 +1836,40 @@ function updatePickups(){
     }
   }
 }
-function updateWanted(dt){
-  if(player.wanted <= 0){ $('stars').innerHTML=''; return; }
-  // are police watching?
-  let seen = false;
+function copHasVisual(){
   const px = player.car?player.car.x:player.x, py = player.car?player.car.y:player.y;
-  for(const v of vehicles) if(v.ai==='cop' && !v.dead && dist(v.x,v.y,px,py) < 620) seen = true;
-  for(const p of peds) if(p.kind==='cop' && !p.dead && dist(p.x,p.y,px,py) < 460) seen = true;
-  if(seen) player.seenT = 0; else player.seenT += dt;
-  const need = 8 + Math.ceil(player.wanted)*4;
-  if(player.seenT > need){ player.wanted = Math.max(0, player.wanted-1); player.seenT = 0;
-    if(player.wanted<=0) toast('YOU LOST THEM'); }
+  for(const v of vehicles){
+    if(v.ai!=='cop' || v.dead) continue;
+    if(dist(v.x,v.y,px,py) < sight(720) && !lineBlocked(v.x,v.y,px,py)) return true;
+  }
+  for(const p of peds){
+    if(p.kind!=='cop' || p.dead) continue;
+    if(dist(p.x,p.y,px,py) < sight(500) && !lineBlocked(p.x,p.y,px,py)) return true;
+  }
+  return false;
+}
+function updateWanted(dt){
+  if(player.wanted <= 0){ police.seen=false; police.searchT=0; police.hadVisual=false; return; }
+  const px = player.car?player.car.x:player.x, py = player.car?player.car.y:player.y;
+  police.losT -= dt;
+  if(police.losT <= 0){                       // line of sight is costly: ~8 checks/sec
+    police.losT = 0.12;
+    const sn = copHasVisual();
+    if(sn && !police.seen) police.hadVisual = true;
+    if(!sn && police.seen && police.hadVisual) toast('POLICE LOST VISUAL  —  BREAK AWAY');
+    police.seen = sn;
+  }
+  if(police.seen){
+    police.lastKnown.x = px; police.lastKnown.y = py;   // they only know what they can see
+    player.seenT = 0; police.searchT = 0;
+  } else { player.seenT += dt; police.searchT += dt; }
+  const need = 6 + stars()*3;
+  if(player.seenT > need){
+    player.wanted = Math.max(0, player.wanted-1);
+    player.seenT = 0; police.hadVisual = false;
+    if(player.wanted <= 0){ toast('YOU LOST THEM'); police.searchT = 0; }
+    else toast('HEAT DROPPING  —  ' + stars() + ' STAR' + (stars()>1?'S':''));
+  }
 }
 function updateJob(dt){
   if(!job){ return; }
@@ -1690,7 +2049,8 @@ function render(){
     ctx.fillStyle = 'rgba(6,9,26,'+(nAmt*0.55)+')';
     ctx.fillRect(0,0,W,H);
     ctx.globalCompositeOperation='lighter';
-    // streetlights at intersections
+    // streetlights at intersections — gradients are the costliest thing we draw
+    if(quality > 0.7){
     const li0 = clamp(Math.floor((cam.x-W/2)/P),0,GRID), li1 = clamp(Math.ceil((cam.x+W/2)/P),0,GRID);
     const lj0 = clamp(Math.floor((cam.y-H/2)/P),0,GRID), lj1 = clamp(Math.ceil((cam.y+H/2)/P),0,GRID);
     for(let i=li0;i<=li1;i++) for(let j=lj0;j<=lj1;j++){
@@ -1699,8 +2059,9 @@ function render(){
       g.addColorStop(0,'rgba(255,214,140,'+(0.22*nAmt)+')'); g.addColorStop(1,'rgba(255,214,140,0)');
       ctx.fillStyle=g; ctx.fillRect(p[0]-150,p[1]-150,300,300);
     }
+    }
     // headlights
-    for(const v of vehicles){
+    if(quality > 0.55) for(const v of vehicles){
       if(v.dead) continue;
       if(Math.abs(v.x-cam.x)>W/2+120||Math.abs(v.y-cam.y)>H/2+120) continue;
       headlight(v.x, v.y, v.a, nAmt);
@@ -1717,10 +2078,8 @@ function render(){
   }
   ctx.globalCompositeOperation='source-over';
 
-  // vignette + damage flash
-  const vg = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.35,W/2,H/2,Math.max(W,H)*0.75);
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,.55)');
-  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+  // vignette + damage flash (gradient cached — it only changes on resize)
+  ctx.fillStyle = vignette(); ctx.fillRect(0,0,W,H);
   if(player.hp < 35 && player.dead<=0){
     ctx.fillStyle = 'rgba(150,10,25,'+(0.10+0.06*Math.sin(gameT*6))+')'; ctx.fillRect(0,0,W,H);
   }
@@ -1732,7 +2091,17 @@ function render(){
     ctx.textAlign='left';
   }
   // crosshair
-  if(!player.dead){
+  if(touch.on){
+    if(!player.dead && !player.car){
+      const px2 = player.x, py2 = player.y;
+      const a = proj(px2 + Math.cos(player.aim)*46, py2 + Math.sin(player.aim)*46, 16);
+      const b = proj(px2 + Math.cos(player.aim)*120, py2 + Math.sin(player.aim)*120, 16);
+      ctx.strokeStyle = touch.aim.mag>0.55 ? 'rgba(255,59,92,.85)' : 'rgba(142,242,196,.5)';
+      ctx.lineWidth = 2; ctx.setLineDash([7,7]);
+      ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  } else if(!player.dead){
     ctx.strokeStyle='rgba(142,242,196,.8)'; ctx.lineWidth=1.5;
     ctx.beginPath();
     ctx.arc(mouse.x,mouse.y,9,0,TAU);
@@ -1746,6 +2115,16 @@ function render(){
   if(job) drawJobArrow();
 }
 
+let _vg=null, _vgKey='';
+function vignette(){
+  const k = W+'x'+H;
+  if(k !== _vgKey){
+    _vgKey = k;
+    _vg = ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.35,W/2,H/2,Math.max(W,H)*0.75);
+    _vg.addColorStop(0,'rgba(0,0,0,0)'); _vg.addColorStop(1,'rgba(0,0,0,.55)');
+  }
+  return _vg;
+}
 function headlight(x,y,a,amt){
   const p = proj(x+Math.cos(a)*26, y+Math.sin(a)*26, 10);
   const far = proj(x+Math.cos(a)*230, y+Math.sin(a)*230, 10);
@@ -1921,6 +2300,13 @@ function drawPed(p){
     const g = proj(p.x+Math.cos(p.a)*14, p.y+Math.sin(p.a)*14, 18);
     ctx.fillStyle='#111'; ctx.fillRect(g[0]-3,g[1]-2,7,4);
   }
+  if(p.reporting){                       // this one is dialling 911 on you
+    const b = proj(p.x, p.y, 40 + Math.sin(gameT*9)*3);
+    ctx.fillStyle = Math.floor(gameT*8)%2 ? '#ff3b5c' : '#ffc247';
+    ctx.beginPath(); ctx.arc(b[0],b[1],8,0,TAU); ctx.fill();
+    ctx.fillStyle='#0b0f14'; ctx.font='bold 11px ui-monospace,monospace'; ctx.textAlign='center';
+    ctx.fillText('!', b[0], b[1]+4); ctx.textAlign='left';
+  }
 }
 function drawPlayer(){
   ctx.fillStyle='rgba(0,0,0,.35)';
@@ -2028,6 +2414,15 @@ function drawMini(){
   // job
   if(job){ const p=w2m(job.x,job.y);
     mc.fillStyle='#ffc247'; mc.beginPath(); mc.arc(p[0],p[1],4.5,0,TAU); mc.fill(); }
+  // witnesses calling it in
+  for(const p2 of peds) if(p2.reporting){ const p=w2m(p2.x,p2.y);
+    mc.fillStyle='#ffc247'; mc.beginPath(); mc.arc(p[0],p[1],3,0,TAU); mc.fill(); }
+  // where the police think you are
+  if(player.wanted>0 && !police.seen){
+    const p=w2m(police.lastKnown.x, police.lastKnown.y);
+    mc.strokeStyle='rgba(255,59,92,.7)'; mc.lineWidth=1.5;
+    mc.beginPath(); mc.arc(p[0],p[1],11,0,TAU); mc.stroke();
+  }
   // cops
   for(const v of vehicles) if(v.ai==='cop'&&!v.dead){ const p=w2m(v.x,v.y);
     mc.fillStyle= Math.floor(gameT*6)%2?'#4d7dff':'#ff3b5c'; mc.beginPath(); mc.arc(p[0],p[1],3,0,TAU); mc.fill(); }
@@ -2077,9 +2472,11 @@ function drawBigMap(){
 
 function drawHUD(dt){
   $('cash').textContent = money(player.money);
-  const stars = Math.ceil(player.wanted);
+  const st = stars();
   let s = '';
-  for(let i=0;i<5;i++) s += i<stars? '<b>★</b>' : '☆';
+  for(let i=0;i<5;i++) s += i<st? '<b>★</b>' : '☆';
+  // flashing stars mean they've lost you and are searching
+  $('stars').style.opacity = (player.wanted>0 && !police.seen) ? (Math.floor(gameT*4)%2?0.3:1) : 1;
   $('stars').innerHTML = s;
   $('hpb').firstElementChild.style.transform = 'scaleX('+(player.hp/100)+')';
   $('apb').firstElementChild.style.transform = 'scaleX('+(player.armor/100)+')';
@@ -2122,13 +2519,21 @@ function drawHUD(dt){
 /* ============================================================
    LOOP
    ============================================================ */
-let last = performance.now();
+let last = performance.now(), frameN = 0;
 function frame(now){
   let dt = (now-last)/1000; last = now;
   dt = Math.min(dt, 0.05);
+  frameN++;
+  ftAvg = ftAvg*0.92 + (dt*1000)*0.08;
+  qTimer += dt;
+  if(qTimer > 1.2){                       // retune roughly once a second
+    qTimer = 0;
+    if(ftAvg > 30 && quality > 0.35) quality = Math.max(0.35, quality-0.12);
+    else if(ftAvg < 17 && quality < 1)  quality = Math.min(1, quality+0.06);
+  }
   if(started && !mapOpen) update(dt);
   render();
-  drawMini();
+  if(!IS_TOUCH || (frameN & 1)) drawMini();   // minimap at 30fps on phones
   drawHUD(dt);
   requestAnimationFrame(frame);
 }
